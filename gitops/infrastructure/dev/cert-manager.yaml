@@ -1,8 +1,28 @@
+
+# Installs cert-manager via its official OCI Helm chart. AWS-side IAM
+# for Route53 DNS-01 challenges is provisioned by Terraform
+# (modules/eks-cluster/cert-manager-iam.tf) using EKS Pod Identity —
+# same pattern as the ALB controller.
+#
+# extraArgs sets --issuer-ambient-credentials=true: this is required
+# for ClusterIssuer (cluster-scoped) objects to be allowed to use
+# ambient IAM credentials (Pod Identity/IRSA) at all — without it,
+# cert-manager only permits ambient credentials for namespace-scoped
+# Issuer objects, and ClusterIssuers using Route53 will fail with an
+# access-denied-looking error that's actually this flag missing.
+#
+# sync-wave "0" (with cluster-issuers.yaml at wave "1") makes ArgoCD
+# apply and wait for this to be healthy BEFORE attempting the
+# ClusterIssuer objects — those need the CRD this Application installs.
+# Without wave ordering, app-of-apps tries to apply both in one batch
+# and the whole sync fails because the CRD doesn't exist yet.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: cert-manager
   namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   project: default
   source:
