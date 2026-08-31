@@ -21,6 +21,7 @@ spec:
       values: |
         clusterName: eks-platform-dev
         region: us-east-1
+        vpcId: vpc-0151570534a05472d
         serviceAccount:
           name: aws-load-balancer-controller
   destination:
