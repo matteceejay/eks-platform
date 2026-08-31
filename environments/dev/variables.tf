@@ -55,3 +55,9 @@ variable "tags" {
     ManagedBy = "terraform"
   }
 }
+
+variable "route53_hosted_zone_id" {
+  description = "Route53 hosted zone ID for cert-manager DNS-01 challenges"
+  type        = string
+  default     = ""
+}

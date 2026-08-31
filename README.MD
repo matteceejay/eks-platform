@@ -222,6 +222,9 @@ terraform output configure_kubeconfig
 # then run whatever it prints, e.g.:
 aws eks update-kubeconfig --name eks-platform-dev --region us-east-1
 
+
+aws eks update-kubeconfig --name eks-platform-dev --region us-east-1
+
 # 8. Confirm you can reach it
 kubectl get nodes
 ```

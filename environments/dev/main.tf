@@ -28,6 +28,7 @@ module "eks_platform_cluster" {
 
   endpoint_public_access       = var.endpoint_public_access
   endpoint_public_access_cidrs = var.endpoint_public_access_cidrs
+  route53_hosted_zone_id = var.route53_hosted_zone_id
 
   tags = local.common_tags
 }

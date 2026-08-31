@@ -16,3 +16,5 @@ tags = {
   ManagedBy = "terraform"
   Team      = "platform"
 }
+
+route53_hosted_zone_id = "Z06378293QWI1PIU1LSKR"

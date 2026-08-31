@@ -47,3 +47,9 @@ variable "tags" {
   type    = map(string)
   default = {}
 }
+
+variable "route53_hosted_zone_id" {
+  description = "Route53 hosted zone ID cert-manager is scoped to for DNS-01 challenges (e.g. Z0123456789ABCDEFGHIJ)"
+  type        = string
+  default     = ""
+}
