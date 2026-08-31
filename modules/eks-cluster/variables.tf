@@ -1,0 +1,49 @@
+variable "cluster_name" {
+  description = "Name of the EKS cluster"
+  type        = string
+}
+
+variable "kubernetes_version" {
+  description = "Kubernetes version for the control plane"
+  type        = string
+  default     = "1.33"
+}
+
+variable "vpc_id" {
+  description = "VPC ID (from the vpc module)"
+  type        = string
+}
+
+variable "subnet_ids" {
+  description = "Subnet IDs for the cluster control plane ENIs and Auto Mode nodes (private subnets recommended)"
+  type        = list(string)
+}
+
+variable "endpoint_public_access" {
+  description = "Whether the EKS public API endpoint is enabled. Best practice: false in prod, true (with CIDR restriction) acceptable in dev for convenience."
+  type        = bool
+  default     = false
+}
+
+variable "endpoint_public_access_cidrs" {
+  description = "CIDRs allowed to reach the public API endpoint, only relevant if endpoint_public_access = true"
+  type        = list(string)
+  default     = []
+}
+
+variable "auto_mode_node_pools" {
+  description = "EKS Auto Mode built-in node pools to enable"
+  type        = list(string)
+  default     = ["system", "general-purpose"]
+}
+
+variable "enabled_cluster_log_types" {
+  description = "Control plane log types shipped to CloudWatch"
+  type        = list(string)
+  default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+}
+
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
