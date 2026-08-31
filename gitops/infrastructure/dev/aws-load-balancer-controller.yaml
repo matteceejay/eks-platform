@@ -1,0 +1,34 @@
+# gitops/infrastructure/dev/aws-load-balancer-controller.yaml
+#
+# Installs the AWS Load Balancer Controller via its official Helm chart.
+# AWS-side IAM permissions for this controller are provisioned by
+# Terraform (modules/eks-cluster/alb-controller-iam.tf) using EKS Pod
+# Identity — this Application only creates the Kubernetes-side objects
+# (the Deployment, webhooks, CRDs) and a ServiceAccount that matches the
+# name already associated with that IAM role.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-load-balancer-controller
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://aws.github.io/eks-charts
+    chart: aws-load-balancer-controller
+    targetRevision: 1.17.1
+    helm:
+      values: |
+        clusterName: eks-platform-dev
+        region: us-east-1
+        serviceAccount:
+          name: aws-load-balancer-controller
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kube-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
