@@ -1,49 +1,47 @@
 # gitops/infrastructure/dev/cluster-issuers.yaml
 #
-# Two ClusterIssuers: use letsencrypt-staging while testing (higher rate
-# limits, but certs are untrusted by browsers) and switch a Certificate/
-# Ingress to letsencrypt-prod once the staging path is proven working.
+# Delivers the raw ClusterIssuer CRs in ./cluster-issuers/ as their own
+# ArgoCD Application. This has to be an Application (not raw CRs sitting
+# in the app-of-apps root) because app-of-apps runs API discovery over
+# every manifest in its directory before applying ANY sync-wave. Raw
+# ClusterIssuer objects reference cert-manager.io/v1, which does not
+# exist until the cert-manager chart installs its CRDs, so their
+# presence in the root made the entire app-of-apps sync fail
+# ("failed to discover server resources for group version
+# cert-manager.io/v1") and wave "0" never ran.
 #
-# No accessKeyID/secretAccessKeySecretRef is set for route53 — this
-# relies on ambient credentials from EKS Pod Identity (the role
-# associated in modules/eks-cluster/cert-manager-iam.tf), which is why
-# --issuer-ambient-credentials=true had to be set on the cert-manager
-# controller (see cert-manager.yaml).
-#
-# sync-wave "1" — must come after cert-manager.yaml's wave "0", since
-# these objects require the ClusterIssuer CRD that cert-manager installs.
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
+# sync-wave "0" for cert-manager.yaml and "1" here makes app-of-apps
+# create the cert-manager Application first. SkipDryRunOnMissingResource
+# lets THIS Application's own sync succeed even while the ClusterIssuer
+# CRD is still missing; automated + selfHeal + retry then reconciles the
+# issuers as soon as cert-manager finishes installing.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
 metadata:
-  name: letsencrypt-staging
+  name: cluster-issuers
+  namespace: argocd
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  acme:
-    server: https://acme-staging-v02.api.letsencrypt.org/directory
-    email: matteceejay@gmail.com
-    privateKeySecretRef:
-      name: letsencrypt-staging-account-key
-    solvers:
-      - dns01:
-          route53:
-            region: us-east-1
-            hostedZoneID: Z06378293QWI1PIU1LSKR
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: letsencrypt-prod
-  annotations:
-    argocd.argoproj.io/sync-wave: "1"
-spec:
-  acme:
-    server: https://acme-v02.api.letsencrypt.org/directory
-    email: matteceejay@gmail.com
-    privateKeySecretRef:
-      name: letsencrypt-prod-account-key
-    solvers:
-      - dns01:
-          route53:
-            region: us-east-1
-            hostedZoneID: Z06378293QWI1PIU1LSKR
+  project: default
+  source:
+    repoURL: https://github.com/matteceejay/eks-platform.git
+    targetRevision: main
+    path: gitops/infrastructure/dev/cluster-issuers
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - SkipDryRunOnMissingResource=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 15s
+        factor: 2
+        maxDuration: 5m
