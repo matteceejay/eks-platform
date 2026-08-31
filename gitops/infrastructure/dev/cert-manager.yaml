@@ -28,7 +28,9 @@ spec:
   source:
     repoURL: oci://quay.io/jetstack/charts
     chart: cert-manager
-    targetRevision: v1.21.1
+    # quay.io OCI chart tags have no "v" prefix (v1.21.1 -> 401 from quay,
+    # which returns 401 rather than 404 for a nonexistent tag).
+    targetRevision: 1.21.1
     helm:
       values: |
         crds:
