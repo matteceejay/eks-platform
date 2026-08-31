@@ -26,10 +26,14 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: oci://quay.io/jetstack/charts
+    # OCI Helm chart. With the repoURL + `chart` split, ArgoCD wants the
+    # registry/namespace WITHOUT the oci:// scheme — with the scheme it
+    # treats repoURL as the whole chart ref, never appends `chart`, and
+    # resolves quay.io/jetstack/charts:<tag> (404 -> quay returns 401).
+    #
+    # quay.io OCI chart tags also have no "v" prefix (1.21.1, not v1.21.1).
+    repoURL: quay.io/jetstack/charts
     chart: cert-manager
-    # quay.io OCI chart tags have no "v" prefix (v1.21.1 -> 401 from quay,
-    # which returns 401 rather than 404 for a nonexistent tag).
     targetRevision: 1.21.1
     helm:
       values: |
