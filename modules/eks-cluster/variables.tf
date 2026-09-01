@@ -43,6 +43,15 @@ variable "enabled_cluster_log_types" {
   default     = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
 }
 
+
+variable "external_secrets_name_prefix" {
+  description = "Secrets Manager secret name prefix external-secrets is allowed to read (e.g. \"eks-platform/*\"). Default \"*\" allows all secrets in the account/region — narrow this once you know your naming convention."
+  type        = string
+  default     = "*"
+}
+
+
+
 variable "tags" {
   type    = map(string)
   default = {}
