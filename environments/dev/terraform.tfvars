@@ -7,7 +7,7 @@ nat_strategy = "single"
 kubernetes_version = "1.33"
 
 endpoint_public_access       = true
-endpoint_public_access_cidrs = ["100.38.56.31/32"] # <-- REPLACE with your real office/VPN CIDR(s)
+endpoint_public_access_cidrs = ["24.191.114.137/32"] # <-- REPLACE with your real office/VPN CIDR(s)
 
 gitops_repo_url        = "https://github.com/matteceejay/eks-platform.git" # <-- REPLACE with your actual repo URL
 gitops_target_revision = "main"

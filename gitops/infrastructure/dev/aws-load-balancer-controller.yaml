@@ -21,7 +21,10 @@ spec:
       values: |
         clusterName: eks-platform-dev
         region: us-east-1
-        vpcId: vpc-0151570534a05472d
+        # vpcId intentionally omitted: the controller auto-discovers it from
+        # instance metadata. Pinning it here caused an outage when Terraform
+        # recreated the VPC and this value went stale (subnet auto-discovery
+        # ran against a deleted VPC -> "Evaluated 0 subnets").
         serviceAccount:
           name: aws-load-balancer-controller
   destination:
